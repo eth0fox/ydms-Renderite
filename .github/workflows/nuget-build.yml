@@ -1,0 +1,43 @@
+name: 'Build and push NuGet Package'
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build-nuget:
+    name: 'Build NuGet package and push it.'
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        projects:
+          - 'Renderite.Shared/Renderite.Shared.csproj'
+          - 'Renderite.Unity/Renderite.Unity.csproj'
+
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: 'Install Unity'
+        uses: buildalon/unity-setup@ab626823a2d32033d5a7811169d0ce92e8010d38 # v2.3.0
+        if: contains('Unity', matrix.projects)
+        id: unity-setup
+        with:
+          unity-version: '2019.4.19f1'
+          modules: |
+            windows-mono
+          cache-installation: 'true'
+
+      - name: 'Build NuGet packages'
+        uses: Yellow-Dog-Man/composite-actions-templates/.github/actions/dotnet-build@606ac289d701be7b7d90e5ff8647dedf57d6d755
+        with:
+          dotnet-build-args: '-p:Version=${{ github.ref_name }} -o nupkgs'
+          dotnet-build-type: 'pack'
+          dotnet-project-path: '${{ matrix.projects }}'
+
+      - name: 'Push NuGet'
+        uses: Yellow-Dog-Man/composite-actions-templates/.github/actions/dotnet-build-push-nuget@606ac289d701be7b7d90e5ff8647dedf57d6d755
+        with:
+          dotnet-nuget-auth-token: ${{ secrets.NUGET_TOKEN }}

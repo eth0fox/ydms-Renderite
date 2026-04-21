@@ -5,6 +5,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <LangVersion>11</LangVersion>
     <Nullable>enable</Nullable>
+    <PackageId>YellowDogMan.Renderite.Shared</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
