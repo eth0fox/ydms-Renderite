@@ -9,10 +9,12 @@ namespace Renderite.Unity
     public static class WindowsNativeHelper
     {
         const uint GW_OWNER = 4;
+        private static bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         /// <summary>Returns true if the current application has focus, false otherwise</summary>
-        public static bool ApplicationIsActivated()
+        public static bool ApplicationIsActivated() 
         {
+            if (!IsWindows) return false;
             var activatedHandle = GetForegroundWindow();
 
             if (activatedHandle == IntPtr.Zero)
@@ -40,25 +42,26 @@ namespace Renderite.Unity
 
         static IntPtr GetSelfMainWindowHandle() => GetMainWindowHandle(Process.GetCurrentProcess().Id);
 
-        public static IntPtr GetMainWindowHandle(int processId)
+        public static IntPtr GetMainWindowHandle(int processId) 
         {
             IntPtr mainWindow = IntPtr.Zero;
 
-            EnumWindows((hWnd, lParam) =>
-            {
-                GetWindowThreadProcessId(hWnd, out var windowPid);
-
-                if (windowPid == processId)
+            if (IsWindows)
+                EnumWindows((hWnd, lParam) =>
                 {
-                    // Check if it's a top-level visible window (not owned)
-                    if (GetWindow(hWnd, GW_OWNER) == IntPtr.Zero && IsWindowVisible(hWnd))
+                    GetWindowThreadProcessId(hWnd, out var windowPid);
+
+                    if (windowPid == processId)
                     {
-                        mainWindow = hWnd;
-                        return false;
+                        // Check if it's a top-level visible window (not owned)
+                        if (GetWindow(hWnd, GW_OWNER) == IntPtr.Zero && IsWindowVisible(hWnd))
+                        {
+                            mainWindow = hWnd;
+                            return false;
+                        }
                     }
-                }
-                return true;
-            }, IntPtr.Zero);
+                    return true;
+                }, IntPtr.Zero);
 
             return mainWindow;
         }

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -964,7 +965,7 @@ namespace Renderite.Unity
 
             Debug.Log("UniqueSessionId: " + UniqueSessionId);
 
-            if (!Renderite.Shared.Helper.IsWine)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Renderite.Shared.Helper.IsWine)
             {
                 var wasapi = new CSCore.SoundOut.WasapiOut(false, CSCore.CoreAudioAPI.AudioClientShareMode.Shared, 100, initData.uniqueSessionId, true);
                 var audioFormat = new WaveFormat(wasapi.Device.DeviceFormat.SampleRate, 32, wasapi.Device.DeviceFormat.Channels, AudioEncoding.IeeeFloat);
